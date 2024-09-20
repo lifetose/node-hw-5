@@ -1,3 +1,4 @@
+import { TokenTypeEnum } from "../enums/token-type.enum";
 import { ApiError } from "../errors/api-error";
 import { ITokenPair } from "../interfaces/token.interface";
 import { ISignIn, IUser } from "../interfaces/user.interface";
@@ -38,15 +39,46 @@ class AuthService {
       throw new ApiError("Invalid credentials", 401);
     }
 
-    const tokens = tokenService.generateTokens({
+    // const tokens = tokenService.generateTokens({
+    //   userId: user._id,
+    //   role: user.role,
+    // });
+    // await tokenRepository.create({ ...tokens, _userId: user._id });
+
+    const newTokens = tokenService.generateTokens({
       userId: user._id,
       role: user.role,
     });
-    await tokenRepository.create({ ...tokens, _userId: user._id });
-    return { user, tokens };
+
+    await tokenRepository.updateTokenPair(user._id, newTokens);
+
+    return { user, tokens: newTokens };
   }
 
-  // TODO add refresh token service
+  public async refreshTokens(refreshToken: string): Promise<ITokenPair> {
+    const tokenData = tokenService.verifyToken(
+      refreshToken,
+      TokenTypeEnum.REFRESH,
+    );
+
+    const tokenPair = await tokenRepository.findByParams({ refreshToken });
+    if (!tokenPair) {
+      throw new ApiError("Invalid refresh token", 401);
+    }
+
+    const user = await userRepository.getById(tokenData.userId);
+    if (!user) {
+      throw new ApiError("User not found", 404);
+    }
+
+    const newTokens = tokenService.generateTokens({
+      userId: user._id,
+      role: user.role,
+    });
+
+    await tokenRepository.updateTokenPair(user._id, newTokens);
+    return newTokens;
+  }
 
   private async isEmailExistOrThrow(email: string): Promise<void> {
     const user = await userRepository.getByEmail(email);

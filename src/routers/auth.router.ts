@@ -8,15 +8,15 @@ const router = Router();
 
 router.post(
   "/sign-up",
-  commonMiddleware.isBodyValid(UserValidator.create),
+  commonMiddleware.isBodyValid(UserValidator.signUp),
   authController.signUp,
 );
 router.post(
   "/sign-in",
-  // commonMiddleware.isBodyValid(UserValidator.signIn),
+  commonMiddleware.isBodyValid(UserValidator.signIn),
   authController.signIn,
 );
 
-//TODO add refresh token route
+router.post("/refresh-token", authController.refreshToken);
 
 export const authRouter = router;

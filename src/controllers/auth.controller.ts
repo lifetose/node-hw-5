@@ -24,7 +24,15 @@ class AuthController {
     }
   }
 
-  // TODO add refresh token controller
+  public async refreshToken(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { refreshToken } = req.body;
+      const tokens = await authService.refreshTokens(refreshToken);
+      res.status(200).json(tokens);
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 export const authController = new AuthController();

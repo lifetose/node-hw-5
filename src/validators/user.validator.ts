@@ -13,12 +13,17 @@ export class UserValidator {
   private static password = joi.string().trim().regex(regexConstant.PASSWORD);
   private static phone = joi.string().trim().regex(regexConstant.PHONE);
 
-  public static create = joi.object({
+  public static signUp = joi.object({
     name: this.name.required(),
     age: this.age.required(),
     email: this.email.required(),
     password: this.password.required(),
     phone: this.phone,
+  });
+
+  public static signIn = joi.object({
+    email: this.email.required(),
+    password: this.password.required(),
   });
 
   public static update = joi.object({
